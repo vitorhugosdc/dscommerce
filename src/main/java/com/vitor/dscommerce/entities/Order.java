@@ -3,6 +3,9 @@ package com.vitor.dscommerce.entities;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 /*
@@ -46,6 +49,27 @@ public class Order {
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Payment payment;
 
+    /*
+     * Um pedido para vários itens de pedido
+     *
+     * Por que id.order? Porque no OrderItem eu tenho o id, e esse id por sua vez é
+     * quem possui uma referência ao pedido e o possui. Ou seja, o order que possui
+     * o mapeamento tá lá na OrderItemPK. O OrderItemPK é um atributo do OrderItem,
+     * então acessamos id.order.
+     *
+     * Basicamente, eu preciso referenciar o nome do atributo que referência Order lá na classe OrderItem,
+     * mas a classe OrderItem não tem um Order explicito, por isso a gente acessa o id e referencia Order lá
+     *
+     * Set pois o pedido não pode ter items de pedido repetidos (o item de pedido
+     * possui sua quantidade, então se for mais de 1, por exemplo, isso é
+     * transmitido pela quantidade dele, não por adicionar mais um igual na lista de
+     * items do pedido, então, se tem mais de um item de pedido igual, ele é
+     * refletido no atributo quantity da classe OrderItem e, não repetição dele nos
+     * itens de pedido.
+     */
+    @OneToMany(mappedBy = "id.order")
+    private Set<OrderItem> items = new HashSet<>();
+
     public Order() {
     }
 
@@ -86,5 +110,22 @@ public class Order {
 
     public void setClient(User client) {
         this.client = client;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+    /*Retorna os items de pedido de determinado pedido*/
+    public Set<OrderItem> getItems() {
+        return items;
+    }
+
+    /*Método para acessarmos todos os produtos do pedido (tá no diagrama)*/
+    public List<Product> getProducts() {
+        /*map<entrada: OrderItem,saida: Product>*/
+        return items.stream().map(OrderItem::getProduct).toList();
+        /*return items.stream().map(x -> x.getProduct()).toList();*/
+        /*return items.stream().map(x -> x.getProduct()).collect(Collectors.toList();*/
+
     }
 }

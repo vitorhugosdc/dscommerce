@@ -1,16 +1,9 @@
 package com.vitor.dscommerce.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -67,8 +60,16 @@ public class Product {
     /* Muitos-para-muitos comum (sem atributos no meio) a gente tem uma tabela extra contendo os IDs das duas entidades (Category e Product)
     Esses 2 IDs não podem se repetir nessa terceira tabela, POR ISSO, para indicar isso ao JPA, iremos usar o tipo Set e não o tipo List*/
     @ManyToMany
-    @JoinTable(name = "tb_product_category", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @JoinTable(name = "tb_product_category",
+            joinColumns = @JoinColumn(name = "product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> categories = new HashSet<>();
+
+    /* Igual da classe Order, porém, com id.product */
+    /* Basicamente, eu preciso referenciar o nome do atributo que referência Product lá na classe OrderItem,
+     * mas a classe OrderItem não tem um Product explicito, por isso a gente acessa o id e referencia Oroduct lá*/
+    @OneToMany(mappedBy = "id.product")
+    private Set<OrderItem> items = new HashSet<>();
 
     public Product() {
     }
@@ -123,5 +124,17 @@ public class Product {
 
     public Set<Category> getCategories() {
         return categories;
+    }
+
+    /*Retorna os items de pedido em que o produto está*/
+    public Set<OrderItem> getItems() {
+        return items;
+    }
+
+    /*Método para acessarmos todos os pedidos com o produto (tá no diagrama)*/
+    public List<Order> getOrders() {
+        /*map<entrada: OrderItem,saida: Order>*/
+        return items.stream().map(OrderItem::getOrder).toList();
+        /*return items.stream().map(x -> x.getProduct()).toList();*/
     }
 }
