@@ -4,6 +4,8 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
+import java.util.Objects;
+
 /*No paradigma Orientado a Objetos, eu não tenho o conceito de chave primária composta
 
 O atributo identificador do objeto é 1 só, então tem que criar uma classe auxiliar para representar o par Produto e Pedido (Product e Order). 
@@ -69,5 +71,18 @@ public class OrderItemPK {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderItemPK that = (OrderItemPK) o;
+        return Objects.equals(order, that.order) && Objects.equals(product, that.product);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(order, product);
     }
 }

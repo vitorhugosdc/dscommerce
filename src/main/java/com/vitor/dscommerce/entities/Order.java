@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -115,6 +116,7 @@ public class Order {
     public Payment getPayment() {
         return payment;
     }
+
     /*Retorna os items de pedido de determinado pedido*/
     public Set<OrderItem> getItems() {
         return items;
@@ -127,5 +129,18 @@ public class Order {
         /*return items.stream().map(x -> x.getProduct()).toList();*/
         /*return items.stream().map(x -> x.getProduct()).collect(Collectors.toList();*/
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Order order = (Order) o;
+        return Objects.equals(id, order.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
