@@ -1,5 +1,6 @@
 package com.vitor.dscommerce.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -49,6 +50,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+
+    /*Com essa anotação, estamos configurando que o campo email na hora de ser convertido para o banco relacional, a coluna seja ÚNICA, o próprio banco de dados não permite a repetição, então estamos assegurando em nível de banco*/
+    @Column(unique = true)
     private String email;
     private String phone;
     private LocalDate birthDate;
