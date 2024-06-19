@@ -38,4 +38,24 @@ public class ProductService {
         /*.map direto sem o stream, pois o Page já é um stream*/
         return products.map(x -> new ProductDTO(x));
     }
+
+    @Transactional
+    public ProductDTO insert(ProductDTO productDto) {
+        /*O repository monitora Product, não ProductDTO, então para salvar é necessário converter o DTO recebido para Product,
+         * Por isso utilizamos a função auxiliar fromDTO que recebe um ProductDTO e converte para Product
+         * O repository.save retorna um Product (o que acabou de ser inserido/salvo), mas como vamos retornar um ProductDTO, convertemos novamente de Product para ProductDTO
+         * Basicamente: recebemos um ProductDTO, convertemos para Product, salvamos, recebemos o Product salvo e convertemos para ProductDTO para ser retornadoo*/
+        Product prod = repository.save(fromDTO(productDto));
+        return new ProductDTO(prod);
+    }
+
+    /*Instância e retorna um Product a partir de um ProductDTO*/
+    private Product fromDTO(ProductDTO productDto) {
+        Product product = new Product();
+        product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
+        product.setPrice(productDto.getPrice());
+        product.setImgUrl(productDto.getImgUrl());
+        return product;
+    }
 }

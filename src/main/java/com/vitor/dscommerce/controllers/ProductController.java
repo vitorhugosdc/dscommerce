@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -39,5 +41,11 @@ public class ProductController {
     @GetMapping
     public Page<ProductDTO> findAll(Pageable pageable) {
         return service.findAll(pageable);
+    }
+
+    /*@RequestBody porque o meu endpoint vai receber um OBJETO do tipo ProductDTO no body*/
+    @PostMapping
+    public ProductDTO insert(@RequestBody ProductDTO productDto) {
+        return service.insert(productDto);
     }
 }
