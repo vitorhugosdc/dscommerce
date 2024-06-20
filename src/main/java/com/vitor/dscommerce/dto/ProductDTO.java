@@ -12,9 +12,6 @@ public class ProductDTO {
     private Double price;
     private String imgUrl;
 
-    public ProductDTO() {
-    }
-
     public ProductDTO(Long id, String name, String description, Double price, String imgUrl) {
         this.id = id;
         this.name = name;
@@ -31,7 +28,8 @@ public class ProductDTO {
         imgUrl = entity.getImgUrl();
     }
 
-    /*DTOs não precisam nem ter SETs, pois não vou querer alterar esses dados, eles vão ser copiados da ENTIDADE e pronto*/
+    /*DTOs não precisam nem ter SETs, pois não vou querer alterar esses dados, eles vão ser copiados da ENTIDADE e pronto
+    * inclusive, é por isso que não há construtor vazio na classe*/
     public Long getId() {
         return id;
     }

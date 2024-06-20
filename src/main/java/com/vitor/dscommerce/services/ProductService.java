@@ -3,6 +3,7 @@ package com.vitor.dscommerce.services;
 import com.vitor.dscommerce.dto.ProductDTO;
 import com.vitor.dscommerce.entities.Product;
 import com.vitor.dscommerce.repositories.ProductRepository;
+import com.vitor.dscommerce.services.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,7 @@ public class ProductService {
     a gente usa para ficar mais rápido, otimizando a transação*/
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
-        Product entity = repository.findById(id).get();
+        Product entity = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Resource not found"));
         return new ProductDTO(entity);
     }
 
