@@ -5,12 +5,16 @@ import com.vitor.dscommerce.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.net.URI;
 
 /*@RestController - Essa anotação indica que a classe é um controlador (Controller) que lida com requisições web.
  * Ela combina a funcionalidade de @Controller e @ResponseBody, ou seja,
@@ -22,11 +26,16 @@ public class ProductController {
     @Autowired
     private ProductService service;
 
-    /* Isso indica que dentro da requisição vai ser aceito um id na URL, então o caminho seria /products/id */
-    @GetMapping(value = "/{id}")
+    /* value = "/{id} indica que dentro da requisição vai ser aceito um id na URL, então o caminho seria /products/id */
     /* @PathVariable pro Spring identificar que é o id recebido como parâmetro */
-    public ProductDTO findById(@PathVariable Long id) {
-        return service.findById(id);
+    /* ResponseEntity é um tipo específico do spring para retornar respostas para
+     * requisições web. Ele é um Generics, e o tipo da resposta dele está entre <>,
+     * utilizar ele é uma boa prática
+     */
+    @GetMapping(value = "/{id}")
+    public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
+        ProductDTO productDto = service.findById(id);
+        return ResponseEntity.ok(productDto);
     }
 
     /*Pageable do Spring.data.domain*/
@@ -39,13 +48,32 @@ public class ProductController {
      * /products?size=12&page=1&sort=name - QueueParam 12 por página e retornando a segunda página (a contagem começa em 0) e ordenada por nome (pode ser qualquer atributo da classe)
      * /products?size=12&page=1&sort=name,desc - QueueParam 12 por página e retornando a segunda página (a contagem começa em 0) e ordenada por nome decrescente*/
     @GetMapping
-    public Page<ProductDTO> findAll(Pageable pageable) {
-        return service.findAll(pageable);
+    public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable) {
+        Page<ProductDTO> productDto = service.findAll(pageable);
+        return ResponseEntity.ok(productDto);
     }
 
     /*@RequestBody porque o meu endpoint vai receber um OBJETO do tipo ProductDTO no body*/
     @PostMapping
-    public ProductDTO insert(@RequestBody ProductDTO productDto) {
-        return service.insert(productDto);
+    public ResponseEntity<ProductDTO> insert(@RequestBody ProductDTO productDto) {
+        productDto = service.insert(productDto);
+        /*
+         * Por que disso? porque quando é inserido um recurso, é mais adequado retornar
+         * o código de resposta 201, e não 200 padrão, pois o 201 é o código específico
+         * HTTP que significa que foi criado um novo recurso, então, retornamos um
+         * ResponseEntity.created(uri), só que o created espera um objeto do tipo URI,
+         * por quê? Porque o padrão HTTP, quando vamos retornar um 201, é esperado que a
+         * resposta contenha um CABEÇALHO chamado Location, contendo o endereço do novo
+         * recurso INSERIDO
+         *
+         * o path recebe um padrão para montar a URL, no caso, o recurso inserido vai
+         * ter o caminho /products (padrão) /id novo inserido, ou seja: /products/id
+         *
+         * o método buildAndExpand espera que eu informe o id inserido, no caso, o id do
+         * novo recurso inserido vai estar em obj, por isso obj.getId()
+         */
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(productDto.getId()).toUri();
+
+        return ResponseEntity.created(uri).body(productDto);
     }
 }
