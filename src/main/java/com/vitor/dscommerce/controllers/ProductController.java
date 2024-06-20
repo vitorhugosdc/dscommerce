@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,8 +35,8 @@ public class ProductController {
      */
     @GetMapping(value = "/{id}")
     public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
-        ProductDTO productDto = service.findById(id);
-        return ResponseEntity.ok(productDto);
+        ProductDTO dto = service.findById(id);
+        return ResponseEntity.ok(dto);
     }
 
     /*Pageable do Spring.data.domain*/
@@ -49,14 +50,14 @@ public class ProductController {
      * /products?size=12&page=1&sort=name,desc - QueueParam 12 por página e retornando a segunda página (a contagem começa em 0) e ordenada por nome decrescente*/
     @GetMapping
     public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable) {
-        Page<ProductDTO> productDto = service.findAll(pageable);
-        return ResponseEntity.ok(productDto);
+        Page<ProductDTO> dto = service.findAll(pageable);
+        return ResponseEntity.ok(dto);
     }
 
     /*@RequestBody porque o meu endpoint vai receber um OBJETO do tipo ProductDTO no body*/
     @PostMapping
-    public ResponseEntity<ProductDTO> insert(@RequestBody ProductDTO productDto) {
-        productDto = service.insert(productDto);
+    public ResponseEntity<ProductDTO> insert(@RequestBody ProductDTO dto) {
+        dto = service.insert(dto);
         /*
          * Por que disso? porque quando é inserido um recurso, é mais adequado retornar
          * o código de resposta 201, e não 200 padrão, pois o 201 é o código específico
@@ -72,8 +73,14 @@ public class ProductController {
          * o método buildAndExpand espera que eu informe o id inserido, no caso, o id do
          * novo recurso inserido vai estar em obj, por isso obj.getId()
          */
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(productDto.getId()).toUri();
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(dto.getId()).toUri();
 
-        return ResponseEntity.created(uri).body(productDto);
+        return ResponseEntity.created(uri).body(dto);
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<ProductDTO> update(@PathVariable Long id, @RequestBody ProductDTO dto) {
+        dto = service.update(id, dto);
+        return ResponseEntity.ok(dto);
     }
 }

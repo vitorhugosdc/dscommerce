@@ -24,8 +24,8 @@ public class ProductService {
     a gente usa para ficar mais rápido, otimizando a transação*/
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
-        Product product = repository.findById(id).get();
-        return new ProductDTO(product);
+        Product entity = repository.findById(id).get();
+        return new ProductDTO(entity);
     }
 
     @Transactional(readOnly = true)
@@ -40,22 +40,40 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductDTO insert(ProductDTO productDto) {
+    public ProductDTO insert(ProductDTO dto) {
         /*O repository monitora Product, não ProductDTO, então para salvar é necessário converter o DTO recebido para Product,
-         * Por isso utilizamos a função auxiliar fromDTO que recebe um ProductDTO e converte para Product
-         * O repository.save retorna um Product (o que acabou de ser inserido/salvo), mas como vamos retornar um ProductDTO, convertemos novamente de Product para ProductDTO
-         * Basicamente: recebemos um ProductDTO, convertemos para Product, salvamos, recebemos o Product salvo e convertemos para ProductDTO para ser retornadoo*/
-        Product prod = repository.save(fromDTO(productDto));
-        return new ProductDTO(prod);
+         * Por isso utilizamos a função auxiliar copyDtoToEntity que recebe um ProductDTO e converte para Product
+         * O repository.save retorna um Product (o que acabou de ser inserido/salvo), mas como vamos retornar um ProductDTO, convertemos novamente de Product para ProductDTO utilizando o construtor de ProductDTO (new ProductDTO(entity))         * Basicamente: recebemos um ProductDTO, convertemos para Product, salvamos, recebemos o Product salvo e convertemos para ProductDTO para ser retornadoo*/
+        Product entity = new Product();
+        copyDtoToEntity(dto, entity);
+        entity = repository.save(entity);
+        return new ProductDTO(entity);
     }
 
-    /*Instância e retorna um Product a partir de um ProductDTO*/
-    private Product fromDTO(ProductDTO productDto) {
-        Product product = new Product();
-        product.setName(productDto.getName());
-        product.setDescription(productDto.getDescription());
-        product.setPrice(productDto.getPrice());
-        product.setImgUrl(productDto.getImgUrl());
-        return product;
+
+    @Transactional
+    public ProductDTO update(Long id, ProductDTO dto) {
+        /*
+         * o getReferenceById instância um usuário, mas ele NÃO VAI no banco de dados
+         * ainda, ele vai deixar um objeto monitorado. É melhor que usar o findById,
+         * pois o findById vai no banco de dados buscar o objeto usuário. O
+         * getReferenceById ele PREPARA o objeto monitorado pela JPA para ser mexido e DEPOIS
+         * realizar uma operação no banco de dados, sendo bem melhor
+         */
+        Product entity = repository.getReferenceById(id);
+
+        copyDtoToEntity(dto, entity);
+
+        entity = repository.save(entity);
+
+        return new ProductDTO(entity);
+
+    }
+
+    private void copyDtoToEntity(ProductDTO dto, Product entity) {
+        entity.setName(dto.getName());
+        entity.setDescription(dto.getDescription());
+        entity.setPrice(dto.getPrice());
+        entity.setImgUrl(dto.getImgUrl());
     }
 }
