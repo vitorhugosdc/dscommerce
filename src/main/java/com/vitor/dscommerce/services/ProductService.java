@@ -3,11 +3,15 @@ package com.vitor.dscommerce.services;
 import com.vitor.dscommerce.dto.ProductDTO;
 import com.vitor.dscommerce.entities.Product;
 import com.vitor.dscommerce.repositories.ProductRepository;
+import com.vitor.dscommerce.services.exceptions.DataBaseException;
 import com.vitor.dscommerce.services.exceptions.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /*Quando um componente vai poder ser injetado, ele precisa ser ser registrado,
@@ -61,19 +65,36 @@ public class ProductService {
          * getReferenceById ele PREPARA o objeto monitorado pela JPA para ser mexido e DEPOIS
          * realizar uma operação no banco de dados, sendo bem melhor
          */
-        Product entity = repository.getReferenceById(id);
+        try {
+            Product entity = repository.getReferenceById(id);
+            copyDtoToEntity(dto, entity);
+            entity = repository.save(entity);
+            return new ProductDTO(entity);
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Resource not found");
+        }
 
-        copyDtoToEntity(dto, entity);
-
-        entity = repository.save(entity);
-
-        return new ProductDTO(entity);
 
     }
 
-    @Transactional
+    /*propagation = Propagation.SUPPORTS é para só executar a transação se esse MÉTODO estiver no contexto de outra transação*/
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
-        repository.deleteById(id);
+        if (!repository.existsById(id)) {
+            throw new ResourceNotFoundException("Resource not found");
+        }
+        try {
+            repository.deleteById(id);
+            /*
+             * DataIntegrityViolationException
+             *
+             * A gente captura a exceção de quando tenta deletar um usuário que está sendo
+             * referenciado em outras tabelas do banco de dados e lança a nossa exceção de
+             * violação de integridade de dados.
+             */
+        } catch (DataIntegrityViolationException e) {
+            throw new DataBaseException("Referential integrity failure");
+        }
     }
 
     private void copyDtoToEntity(ProductDTO dto, Product entity) {
