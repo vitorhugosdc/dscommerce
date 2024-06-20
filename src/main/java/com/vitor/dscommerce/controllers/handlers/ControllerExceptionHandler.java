@@ -1,11 +1,14 @@
 package com.vitor.dscommerce.controllers.handlers;
 
 import com.vitor.dscommerce.dto.CustomError;
+import com.vitor.dscommerce.dto.ValidationError;
 import com.vitor.dscommerce.services.exceptions.DataBaseException;
 import com.vitor.dscommerce.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -48,9 +51,27 @@ public class ControllerExceptionHandler {
     }
 
     @ExceptionHandler(DataBaseException.class)
-    public ResponseEntity<CustomError> dataBaseIntegrity(DataBaseException e, HttpServletRequest request) {
+    public ResponseEntity<CustomError> database(DataBaseException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         CustomError error = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    /*MethodArgumentNotValidException é a exceção lançada quando da erro na validação dos campos*/
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<CustomError> methodArgumentNotValid(MethodArgumentNotValidException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        /*Isso aqui funciona, mesmo o método retornando um CustomError porque CustomError é um supertipo de ValidationError, upcasting*/
+        ValidationError error = new ValidationError(Instant.now(), status.value(), "Invalid data", request.getRequestURI());
+
+        /*MethodArgumentNotValidException e possui dentro dela as informações dos campos que deram erro conforme a validação definida no DTO*/
+        /*O método e.getBindingResult().getFieldErrors() retorna uma lista do tipo FieldErro*/
+        /*For que vai percorrer todos os erros da lista de FieldError dando um apelido para eles de f*/
+        for (FieldError f : e.getBindingResult().getFieldErrors()) {
+            /*Adicioamos o erro na lista de erros, getField retorna o nome do campo que deu erro e getDefaultMessage pega a mensagem de validação*/
+            error.addError(f.getField(), f.getDefaultMessage());
+        }
+
         return ResponseEntity.status(status).body(error);
     }
 }
