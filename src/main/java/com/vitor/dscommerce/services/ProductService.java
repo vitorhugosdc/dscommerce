@@ -2,6 +2,7 @@ package com.vitor.dscommerce.services;
 
 import com.vitor.dscommerce.dto.ProductDTO;
 import com.vitor.dscommerce.entities.Product;
+import com.vitor.dscommerce.projections.ProductProjection;
 import com.vitor.dscommerce.repositories.ProductRepository;
 import com.vitor.dscommerce.services.exceptions.DataBaseException;
 import com.vitor.dscommerce.services.exceptions.ResourceNotFoundException;
@@ -24,8 +25,13 @@ public class ProductService {
     @Autowired
     private ProductRepository repository;
 
-    /*@Transactional do Spring, não do Jakarta*/
-    /*readOnly = true é para não dar lock no banco de dados, como não estou alterando nada, apenas lendo,
+    /*@Transactional do Spring, não do Jakarta
+     * Quando colocamos @Transactional sobre um método, estamos garantindo a resolução da transação no banco de dados, ou seja, o que aprendemos em banco de dados,
+     * como fazer tudo ou não fazer nada, garantir integridade dos dados, etc.
+     * Também estamos garantindo a resolução de todas pendências LAZY, ou seja, se eu buscasse primero um departamento e, depois buscasse todos os funcionários desse departamento,
+     * ao buscar todos funcionários daria erro sem @Transactional, pois ao tentar buscar os funcionários, a sessão JPA já teria finalizado*/
+
+    /*readOnly = true é para não dar lock de escrita no banco de dados, como não estou alterando nada, apenas lendo,
     a gente usa para ficar mais rápido, otimizando a transação*/
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
@@ -95,6 +101,20 @@ public class ProductService {
         } catch (DataIntegrityViolationException e) {
             throw new DataBaseException("Referential integrity failure");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductDTO> searchByName(String name, Pageable pageable) {
+        Page<ProductProjection> result = repository.searchByName(name, pageable);
+        return result.map(x -> new ProductDTO(x));
+    }
+
+    /*Como seria se eu usasse a JPQL ao invés do método acima
+     * A principal diferença é que a JPQL já retorna um objeto Product gerenciado pela JPA, não precisando da projection*/
+    @Transactional(readOnly = true)
+    public Page<ProductDTO> searchByNameJPQL(String name, Pageable pageable) {
+        Page<Product> result = repository.searchByNameJPQL(name, pageable);
+        return result.map(x -> new ProductDTO(x));
     }
 
     private void copyDtoToEntity(ProductDTO dto, Product entity) {

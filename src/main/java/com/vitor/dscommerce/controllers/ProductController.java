@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -99,5 +100,18 @@ public class ProductController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(value = "/searchByName")
+    public ResponseEntity<Page<ProductDTO>> searchByName(@RequestParam(value = "name", defaultValue = "") String name, Pageable pageable) {
+        Page<ProductDTO> result = service.searchByName(name, pageable);
+        return ResponseEntity.ok(result);
+    }
+    /*Como seria se eu usasse a JPQL ao invés do método acima
+    * No controller é igual mesmo*/
+    @GetMapping(value = "/searchByNameJPQL")
+    public ResponseEntity<Page<ProductDTO>> searchByNameJPQL(@RequestParam(value = "name", defaultValue = "") String name, Pageable pageable) {
+        Page<ProductDTO> result = service.searchByNameJPQL(name, pageable);
+        return ResponseEntity.ok(result);
     }
 }

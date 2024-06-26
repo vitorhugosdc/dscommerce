@@ -1,6 +1,7 @@
 package com.vitor.dscommerce.dto;
 
 import com.vitor.dscommerce.entities.Product;
+import com.vitor.dscommerce.projections.ProductProjection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -37,6 +38,15 @@ public class ProductDTO {
         description = entity.getDescription();
         price = entity.getPrice();
         imgUrl = entity.getImgUrl();
+    }
+
+    /*Construtor recebendo a projeção da consulta customizada*/
+    public ProductDTO(ProductProjection projection) {
+        id = projection.getId();
+        name = projection.getName();
+        description =projection.getDescription();
+        price = projection.getPrice();
+        imgUrl = projection.getImgUrl();
     }
 
     /*DTOs não precisam nem ter SETs, pois não vou querer alterar esses dados, eles vão ser copiados da ENTIDADE e pronto
