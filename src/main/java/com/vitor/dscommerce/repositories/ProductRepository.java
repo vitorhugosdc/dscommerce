@@ -1,6 +1,7 @@
 package com.vitor.dscommerce.repositories;
 
 import com.vitor.dscommerce.entities.Product;
+import com.vitor.dscommerce.projections.ProductMinProjection;
 import com.vitor.dscommerce.projections.ProductProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,7 +33,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             "LIKE CONCAT('%', UPPER(:name), '%')",
             countQuery = "SELECT count(*) FROM tb_product " +
                     "WHERE UPPER(tb_product.name) LIKE CONCAT('%', UPPER(:name), '%')")
-    public Page<ProductProjection> searchByName(String name, Pageable pageable);
+    Page<ProductProjection> searchByName(String name, Pageable pageable);
 
     /*Como seria se eu usasse a JPQL ao invés do método acima*/
     /*A consulta JPQL não precisa da projection, podemos retornar o DTO direto
@@ -41,6 +42,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT obj FROM Product obj " +
             "WHERE UPPER(obj.name) LIKE CONCAT('%', UPPER(:name), '%')")
     Page<Product> searchByNameJPQL(String name, Pageable pageable);
+
+    @Query(nativeQuery = true,
+    value = "SELECT tb_product.id, tb_product.name, tb_product.price, tb_product.img_url AS imgUrl " +
+            "FROM tb_product",
+    countQuery = "SELECT count(*) FROM tb_product")
+    Page<ProductMinProjection> searchAllWithoutDescription(Pageable pageable);
 
     /*ABAIXO SÃO COMENTÁRIOS DA AULA LAZY EXPLICANDO MAIS SOBRE SPRING DATA JPA E SEU FUNCIONAMENTO PARA 2 CLASSES QUE NÃO ESTÃO NO PROJETO ATUAL, MAS É BOA EXPLICAÇÃO
     *

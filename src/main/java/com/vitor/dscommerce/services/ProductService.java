@@ -1,7 +1,9 @@
 package com.vitor.dscommerce.services;
 
 import com.vitor.dscommerce.dto.ProductDTO;
+import com.vitor.dscommerce.dto.ProductMinDTO;
 import com.vitor.dscommerce.entities.Product;
+import com.vitor.dscommerce.projections.ProductMinProjection;
 import com.vitor.dscommerce.projections.ProductProjection;
 import com.vitor.dscommerce.repositories.ProductRepository;
 import com.vitor.dscommerce.services.exceptions.DataBaseException;
@@ -48,6 +50,12 @@ public class ProductService {
         /*.map <entrada: Product, saida: ProductDTO>*/
         /*.map direto sem o stream, pois o Page já é um stream*/
         return products.map(x -> new ProductDTO(x));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ProductMinDTO> searchAllWithoutDescription(Pageable pageable) {
+        Page<ProductMinProjection> result = repository.searchAllWithoutDescription(pageable);
+        return result.map(x -> new ProductMinDTO(x));
     }
 
     @Transactional

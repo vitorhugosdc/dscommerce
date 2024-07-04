@@ -1,6 +1,7 @@
 package com.vitor.dscommerce.controllers;
 
 import com.vitor.dscommerce.dto.ProductDTO;
+import com.vitor.dscommerce.dto.ProductMinDTO;
 import com.vitor.dscommerce.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,12 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<Page<ProductDTO>> findAll(Pageable pageable) {
         Page<ProductDTO> dto = service.findAll(pageable);
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping(value = "/searchAllWithoutDescription")
+    public ResponseEntity<Page<ProductMinDTO>> searchAllWithoutDescription(Pageable pageable) {
+        Page<ProductMinDTO> dto = service.searchAllWithoutDescription(pageable);
         return ResponseEntity.ok(dto);
     }
 
