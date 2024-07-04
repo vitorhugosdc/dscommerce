@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,8 @@ public class ProductController {
      * requisições web. Ele é um Generics, e o tipo da resposta dele está entre <>,
      * utilizar ele é uma boa prática
      */
+    /* @PreAuthorize: Configurando a nível de rota que acessar produto por id, o usuário tem que ter uma das 2 ROLEs abaixo, basicamente ele tem que estar logado*/
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
     @GetMapping(value = "/{id}")
     public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
         ProductDTO dto = service.findById(id);
@@ -59,6 +62,8 @@ public class ProductController {
 
     /*@RequestBody porque o meu endpoint vai receber um OBJETO do tipo ProductDTO no body*/
     /*@Valid é pro controllador passar pela verificação de validação dos dados que implementamos no DTO*/
+    /*@PreAuthorize: Somente admins podem cadastrar novos produtos*/
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<ProductDTO> insert(@Valid @RequestBody ProductDTO dto) {
         dto = service.insert(dto);
@@ -82,6 +87,8 @@ public class ProductController {
         return ResponseEntity.created(uri).body(dto);
     }
 
+    /*@PreAuthorize: Somente admins podem atualizar produtos*/
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping(value = "/{id}")
     /* @Valid vai no corpo, não em Id*/
     public ResponseEntity<ProductDTO> update(@PathVariable Long id, @Valid @RequestBody ProductDTO dto) {
@@ -96,6 +103,8 @@ public class ProductController {
      * .noContent() retorna resposta vazia com o código de resposta vazia (204) sem
      * conteúdo 204, HTTP
      */
+    /*@PreAuthorize: Somente admins podem deletar produtos*/
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
