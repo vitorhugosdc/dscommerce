@@ -41,7 +41,8 @@ public class OrderDTO {
          * Agora, o "para-muitos" dos Itens de pedido, ele só busca quando for requisitado
          * Agora, se fosse uma lista de Orders, aí, sim, ele buscaria todos pedidos e só depois todos clientes e pagamentos de cada pedido, gerando
          * uma "chuva" de buscas no banco de dados, aí seria ideal usar um Page com Projections (como no repositório de Product)
-         * mais explicação sobre pode ser vista no ProductService e no ProductRepository*/
+         * mais explicação sobre pode ser vista no ProductService e no ProductRepository
+         * Inclusive, isso aqui daria exceção se não tivesse o @Transacional no findById com o spring.jpa.open-in-view=false*/
         for (OrderItem orderItem : entity.getItems()) {
             items.add(new OrderItemDTO(orderItem));
         }
