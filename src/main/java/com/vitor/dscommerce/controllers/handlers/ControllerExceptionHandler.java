@@ -3,6 +3,7 @@ package com.vitor.dscommerce.controllers.handlers;
 import com.vitor.dscommerce.dto.CustomError;
 import com.vitor.dscommerce.dto.ValidationError;
 import com.vitor.dscommerce.services.exceptions.DataBaseException;
+import com.vitor.dscommerce.services.exceptions.ForbiddenException;
 import com.vitor.dscommerce.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -53,6 +54,13 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(DataBaseException.class)
     public ResponseEntity<CustomError> database(DataBaseException e, HttpServletRequest request) {
         HttpStatus status = HttpStatus.BAD_REQUEST;
+        CustomError error = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<CustomError> forbbiden(ForbiddenException e, HttpServletRequest request) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
         CustomError error = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getRequestURI());
         return ResponseEntity.status(status).body(error);
     }
