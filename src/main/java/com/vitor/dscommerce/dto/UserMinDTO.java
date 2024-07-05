@@ -1,7 +1,6 @@
 package com.vitor.dscommerce.dto;
 
 import com.vitor.dscommerce.entities.User;
-import com.vitor.dscommerce.projections.UserMinProjection;
 
 public class UserMinDTO {
 
@@ -16,11 +15,6 @@ public class UserMinDTO {
     public UserMinDTO(User entity) {
         id = entity.getId();
         name = entity.getName();
-    }
-
-    public UserMinDTO(UserMinProjection projection) {
-        id = projection.getId();
-        name = projection.getName();
     }
 
     public Long getId() {

@@ -32,6 +32,16 @@ public class OrderDTO {
         client = new UserMinDTO(entity.getClient());
         /*Pode ser um pedido que não está pago, então verifica se é nulo antes*/
         payment = (entity.getPayment() == null) ? null : new PaymentMinDTO(entity.getPayment());
+        /*Isso aqui tá gerando uma nova consulta na JPA para buscar os itens de pedido do pedido
+         * Poderia ser melhorado utilizando um OrderProjection.
+         * Um exemplo de como seria está na classe OrderProjection, criada apenas para demonstrar
+         * Mas o getSubTotal() e getTotal() estaria no OrderDTO mesmo (aqui)*/
+        /*Por que UserMinDTO e PaymentMinDTO não triggam uma nova consulta? pois como estamos buscando 1 (um) pedido, é aquele padrão,
+         * se consulta buscando 1 só, ele já busca EAGER os "para-um", ou seja, como Order tem só 1 cliente e só 1 pagamento, ele já busca direto
+         * Agora, o "para-muitos" dos Itens de pedido, ele só busca quando for requisitado
+         * Agora, se fosse uma lista de Orders, aí, sim, ele buscaria todos pedidos e só depois todos clientes e pagamentos de cada pedido, gerando
+         * uma "chuva" de buscas no banco de dados, aí seria ideal usar um Page com Projections (como no repositório de Product)
+         * mais explicação sobre pode ser vista no ProductService e no ProductRepository*/
         for (OrderItem orderItem : entity.getItems()) {
             items.add(new OrderItemDTO(orderItem));
         }
@@ -61,6 +71,7 @@ public class OrderDTO {
         return items;
     }
 
+    /*Retorna no JSON também por ter o get no nome*/
     public Double getTotal() {
         double sum = 0.0;
         for (OrderItemDTO item : items) {
