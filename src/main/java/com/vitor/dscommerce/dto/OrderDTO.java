@@ -3,6 +3,7 @@ package com.vitor.dscommerce.dto;
 import com.vitor.dscommerce.entities.Order;
 import com.vitor.dscommerce.entities.OrderItem;
 import com.vitor.dscommerce.entities.OrderStatus;
+import jakarta.validation.constraints.NotEmpty;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class OrderDTO {
     private OrderStatus status;
     private UserMinDTO client;
     private PaymentMinDTO payment;
+    @NotEmpty(message = "Order must have at least one item")
     private List<OrderItemDTO> items = new ArrayList<>();
 
     public OrderDTO(Long id, Instant moment, OrderStatus status, UserMinDTO client, PaymentMinDTO payment) {
