@@ -1,10 +1,13 @@
 package com.vitor.dscommerce.services;
 
+import com.vitor.dscommerce.dto.CategoryDTO;
 import com.vitor.dscommerce.dto.ProductDTO;
 import com.vitor.dscommerce.dto.ProductMinDTO;
+import com.vitor.dscommerce.entities.Category;
 import com.vitor.dscommerce.entities.Product;
 import com.vitor.dscommerce.projections.ProductMinProjection;
 import com.vitor.dscommerce.projections.ProductProjection;
+import com.vitor.dscommerce.repositories.CategoryRepository;
 import com.vitor.dscommerce.repositories.ProductRepository;
 import com.vitor.dscommerce.services.exceptions.DataBaseException;
 import com.vitor.dscommerce.services.exceptions.ResourceNotFoundException;
@@ -26,6 +29,9 @@ public class ProductService {
 
     @Autowired
     private ProductRepository repository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     /*@Transactional do Spring, não do Jakarta
      * Quando colocamos @Transactional sobre um método, estamos garantindo a resolução da transação no banco de dados, ou seja, o que aprendemos em banco de dados,
@@ -65,6 +71,15 @@ public class ProductService {
          * O repository.save retorna um Product (o que acabou de ser inserido/salvo), mas como vamos retornar um ProductDTO, convertemos novamente de Product para ProductDTO utilizando o construtor de ProductDTO (new ProductDTO(entity))         * Basicamente: recebemos um ProductDTO, convertemos para Product, salvamos, recebemos o Product salvo e convertemos para ProductDTO para ser retornadoo*/
         Product entity = new Product();
         copyDtoToEntity(dto, entity);
+        /*Poderia fazer no copyDtoToEntity, mas ai teria que por @Transactional lá também para isso aqui, precisamos verificar se a categoria existe*/
+        try {
+            for (CategoryDTO cat : dto.getCategories()) {
+                Category category = categoryRepository.getReferenceById(cat.getId());
+                entity.getCategories().add(category);
+            }
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException("Resource not found");
+        }
         entity = repository.save(entity);
         return new ProductDTO(entity);
     }
@@ -82,6 +97,13 @@ public class ProductService {
         try {
             Product entity = repository.getReferenceById(id);
             copyDtoToEntity(dto, entity);
+            /*Limpando as categorias para não ficar as antigas mais as novas, ficar somente as novas*/
+            entity.getCategories().clear();
+            /*Poderia fazer no copyDtoToEntity, mas ai teria que por @Transactional lá também para isso aqui, precisamos verificar se a categoria existe*/
+            for (CategoryDTO cat : dto.getCategories()) {
+                Category category = categoryRepository.getReferenceById(cat.getId());
+                entity.getCategories().add(category);
+            }
             entity = repository.save(entity);
             return new ProductDTO(entity);
         } catch (EntityNotFoundException e) {
