@@ -5,6 +5,7 @@ import com.vitor.dscommerce.entities.Product;
 import com.vitor.dscommerce.projections.ProductProjection;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
@@ -25,6 +26,7 @@ public class ProductDTO {
     @NotBlank(message = "Required field")
     @Size(min = 10, message = "Description must be at least 10 characters")
     private String description;
+    @NotNull(message = "Required field")
     @Positive(message = "Price must be positive")
     private Double price;
     private String imgUrl;
