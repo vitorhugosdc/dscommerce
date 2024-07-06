@@ -38,8 +38,7 @@ public class ProductController {
      * requisições web. Ele é um Generics, e o tipo da resposta dele está entre <>,
      * utilizar ele é uma boa prática
      */
-    /* @PreAuthorize: Configurando a nível de rota que acessar produto por id, o usuário tem que ter uma das 2 ROLEs abaixo, basicamente ele tem que estar logado*/
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CLIENT')")
+
     @GetMapping(value = "/{id}")
     public ResponseEntity<ProductDTO> findById(@PathVariable Long id) {
         ProductDTO dto = service.findById(id);
