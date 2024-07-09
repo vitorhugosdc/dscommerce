@@ -5,7 +5,7 @@
 
 DSCommerce é uma aplicação back-end construída durante o curso Java Spring Professional da [DevSuperior](https://devsuperior.com "Site da DevSuperior").
 
-A aplicação consiste em um sistema de e-commerce, onde é possível realizar o cadastro e gerenciamento de usuários, produtos, categorias, pedidos e items de pedido.
+A aplicação consiste em um sistema de e-commerce, onde é possível realizar o cadastro e gerenciamento de usuários, produtos, categorias, pedidos e itens de pedido.
 
 ## Modelo conceitual
 ![Modelo Conceitual](https://github.com/vitorhugosdc/assets/blob/main/raw/dscommerce/modelo-conceitual.png)
